@@ -1,0 +1,45 @@
+<header class="header section-wrapper">
+    <div class="section-content-wide">
+        <div class="section-gap">
+
+            <h1 class="blog-title center pb-base">
+                <a href="/" class="blog-link">{{ site_setup.title }}</a>
+            </h1>
+
+            {% if site_setup.show_description %}
+                <p class="blog-description pb-base center">{{ site_setup.description }}</p>
+            {% endif %}
+
+            {% if site_setup.show_search %}
+                <div class="search pb-base center">
+                    <form action="#" method="get" class="search-form">
+                        <div class="search-content">
+                            <label for="search-input" class="sr-only" id="search-label">Search</label>
+                            <input type="search" class="search-input" name="search" id="search-input" placeholder="Search">
+                            <button class="search-btn" type="submit" aria-labelledby="search-label">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+
+            {% if site_setup.show_menu %}
+                <nav class="menu">
+                    <ul class="menu-items">
+                        {% for link in site_setup.menulink_set.all %}
+                            <li class="menu-item">
+                                {% if link.new_tab %}
+                                    <a target="_blanck" href="{{ link.url_or_path }}" class="menu-link">{{ link.text }}</a>
+                                {% else %}
+                                    <a href="{{ link.url_or_path }}" class="menu-link">{{ link.text }}</a>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+            {% endif %}
+                
+        </div>
+    </div>
+</header>
