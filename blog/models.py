@@ -1,5 +1,6 @@
 from django.db import models
 from utils.rands import slugify_new
+from django.contrib.auth.models import User
 
 
 class Tag(models.Model):
@@ -63,6 +64,14 @@ class Post(models.Model):
     content = models.TextField()
     cover = models.ImageField(upload_to='posts/%Y/%m/', blank=True, default='')
     cover_in_post_content = models.BooleanField(default=True, help_text="Marcar para publicar dentro do post")
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True,
+                                   null=True, related_name='post_created_by')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True,
+                                   null=True, related_name='post_updated_by')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, default=None)
+    tags = models.ManyToManyField(Tag, blank=True, default='')
 
     def save(self, *args, **kwargs):
         if not self.slug:
