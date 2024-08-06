@@ -1,6 +1,6 @@
 from typing import Any
 from django.db.models.query import QuerySet
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from blog.models import Post, Page
 # from django.core.paginator import Paginator
 from django.db.models import Q
@@ -234,12 +234,29 @@ class PageDetailView(DetailView):
 #     return render(request, 'blog/pages/page.html', {'page': page_obj, 'page_title': page_title, })
 
 
-def post(request, slug):
-    post_obj = Post.objects.get_published().filter(slug=slug).first()  # type:ignore
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'blog/pages/posts.html'
+    slug_field = 'slug'
+    context_object_name = 'post'
 
-    if post_obj is None:
-        raise Http404
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        post = self.get_object()
+        page_title = f'{post.title} - '  # type:ignore
+        context.update({'page_title': page_title, })
+        return context
 
-    page_title = f'{post_obj.title} - '
+    def get_queryset(self):
+        return super().get_queryset().filter(is_published=True)
 
-    return render(request, 'blog/pages/posts.html', {'post': post_obj, 'page_title': page_title, })
+
+# def post(request, slug):
+#     post_obj = Post.objects.get_published().filter(slug=slug).first()  # type:ignore
+
+#     if post_obj is None:
+#         raise Http404
+
+#     page_title = f'{post_obj.title} - '
+
+#     return render(request, 'blog/pages/posts.html', {'post': post_obj, 'page_title': page_title, })
