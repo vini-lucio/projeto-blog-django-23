@@ -11,30 +11,32 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-# import os
+from dotenv import load_dotenv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / 'dotenv_files' / '.env', override=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-@s1rjb-5rmz@spwdvrj$uu_vxlcj-k+e7^%#0gbnci15s@xb1j'
-# SECRET_KEY = os.getenv('SECRET_KEY', 'change-me')
-SECRET_KEY = "8g(x&+3r62fe=)m7!-02)ni2r&d@wg&bu-ipe7&05s^y!j&c"
+SECRET_KEY = os.getenv('SECRET_KEY', 'change-me')
+# SECRET_KEY = "8g(x&+3r62fe=)m7!-02)ni2r&d@wg&bu-ipe7&05s^y!j&c"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = bool(int(os.getenv('DEBUG', 0)))
-DEBUG = True
+DEBUG = bool(int(os.getenv('DEBUG', 0)))
+# DEBUG = True
 
 # ALLOWED_HOSTS = []
-# ALLOWED_HOSTS = [
-#     h.strip() for h in os.getenv('ALLOWED_HOSTS', '').split()
-#     if h.strip()
-# ]
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = [
+    h.strip() for h in os.getenv('ALLOWED_HOSTS', '').split(',')
+    if h.strip()
+]
+# ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -49,6 +51,7 @@ INSTALLED_APPS = [
     'blog',
     'site_setup',
     'django_summernote',
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -59,6 +62,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
+    # It only formats user lockout messages and renders Axes lockout responses
+    # on failed user authentication attempts from login views.
+    # If you do not want Axes to override the authentication response
+    # you can skip installing the middleware and use your own views.
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -162,6 +172,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTHENTICATION_BACKENDS = [
+    # AxesStandaloneBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
+    'axes.backends.AxesStandaloneBackend',
+
+    # Django ModelBackend is the default authentication backend.
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 SUMMERNOTE_CONFIG = {
     'summernote': {
         # Toolbar customization
@@ -188,3 +206,8 @@ SUMMERNOTE_CONFIG = {
     'attachment_filesize_limit': 30 * 1024 * 1024,
     'attachment_model': 'blog.PostAttachment',
 }
+
+AXES_ENABLED = True
+AXES_FAILURE_LIMIT = 3
+AXES_COOLOFF_TIME = 1  # 1 Hora
+AXES_RESET_ON_SUCCESS = True
